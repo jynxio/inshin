@@ -1,5 +1,7 @@
 # Promises/A+
 
+## 概述
+
 一个开放的 JavaScript Promise 标准。
 
 `promise` 代表异步操作的最终结果，我们主要通过 `promise` 的 `then` 方法来使用它，`then` 方法用于注册回调函数，回调函数可以接收到 `promise` 在 `fulfilled` 或 `rejected` 状态下的值。
@@ -82,18 +84,52 @@ const promise_2 = promise_1.then( onFulfilled, onRejected );
 
 > 关于 2.2.4：本文的 2.2.4 是我的个人理解，因为原文的表述非常晦涩。
 >
-> 关于 2.2.7：Promises/A+ 还允许 `promise_2 === promise_1` 这种情况，不过这是不做要求的、额外的实现。
+> 关于 2.2.7：Promises/A+ 允许 `promise_2 === promise_1` 这种情况，并且实现者要主动在文档中说明你的实现是否允许这种情况，并且是在什么条件下才允许的。
 
 ### 2.3 promise 处理程序
 
-`promise 处理程序` 是一个抽象的操作，它是 `promise` 的内部方法，它会接收一个 Promise 实例 `promise` 和一个值 `x`，我们把 `promise 处理程序表示为` `[[Resolve]]( promise, x )`。如果 `x` 是一个 `thenable` 且看起来像一个 Promise 实例的话，那么 `promise 处理程序` 就会试图返回 `promise`，并且用 `x` 的状态来作为这个 `promise` 的状态。否则的话，`promise 处理程序` 就会用 `x` 的值来解决或拒绝 `promise`。
+`promise 处理程序` 是一个抽象的操作，它是 `promise` 的内部方法，它会接收一个 Promise 实例 `promise` 和一个值 `x`，我们把 `promise 处理程序表示为` `[[Resolve]]( promise, x )`。
 
-这种设计更加
+> ECMAScript 规范会使用 `[[]]` 来表示内部属性或方法。
 
-只要 `thanble` 的 `then` 方法符合 Promises/A+ 规范，那么 `promise 处理程序` 就可以像使用 `promise` 的 `then` 方法一样，来使用 `thenable` 的 `then` 方法，比如进行链式调用。另外，它也可以吸收那些不符合 Promises/A+ 规范的 `then` 方法。
+如果 `x` 是一个 `thenable` 且看起来像一个 Promise 实例的话，那么 `promise 处理程序` 就会试图让 `promise` 采用 `x` 的状态，否则 `promise 处理程序` 就会用 `x` 的值来解决 `peomise`。
 
-> ECMAScript 使用 `[[]]` 来表示内部属性或方法。
+这种设计使得 Promise 变得更加通用，因为 Promise 可以接收和处理 `thenable`，只要 `thenable` 的 `then` 方法遵循 Promises/A+ 规范即可。这意味着，遵循 Promises/A+ 规范的 Promise 可以和那些不太遵循 Promises/A+ 规范但实现尚可良好的 Promise 一起使用。
 
-`[[Resolve]]( promise, x )` 的执行步骤如下：
+`[[Resolve]]( promise, x )` 的执行逻辑如下：
 
-2.3.1 如果 `promise` 和 `x` 严格相等
+2.3.1 如果 `x` 和 `promise` 指向同一个对象，那么就拒绝 `promise`，并用 `TypeError` 来作为它的 `reason`。
+
+2.3.2 如果 `x` 是一个 Promise 实例，则令 `promise` 采用 `x` 的状态：
+	2.3.2.1 当 `x` 处于 `pending` 状态时，`promise` 也要保持 `pending` 状态，直至 `x` 被解决或拒绝。
+	2.3.2.2 当 `x` 切换到 `fulfilled` 状态后，`promise` 也要立即切换到 `fulfilled` 状态，并用 `x` 的 `value` 来作为 `promise` 的 `value`。
+	2.3.2.3 当 `x` 切换到 `rejected` 状态后，`promise` 也要立即切换到 `rejected` 状态，并用 `x` 的 `reason` 来作为 `promise` 的 `reason`。
+
+2.3.3 如果 `x` 是一个对象或函数：
+	2.3.3.1 新建一个 `then` 变量，并将 `x.then` 赋值给 `then`。
+	2.3.3.2 如果获取 `x.then` 的值的时候，程序抛出了异常 `e`，那么就拒绝 `promise`，并用 `e` 来作为 `promise` 的 `reason`。
+	2.3.3.3 如果 `then` 是一个函数，那么就调用 `then` 函数，并用 `x` 来作为它调用时的 `this`。并且 `then` 函数要接收 2 个回调函数来作为入参，第一个入参叫做 `resolvePromise`，第二个入参叫做 `rejectPromise`。
+		2.3.3.3.1 如果 `resolvePromise` 被调用，并接收了一个值 `y` 来作为入参，那么就执行 `[[Resolve]]( promise, y )`。该 `y` 代表 `fulfilled` 值。
+		2.3.3.3.2 如果 `rejectPromise` 被调用，并接收了一个值 `r` 来作为入参，那么就拒绝 `promise`，并用 `r` 来作为 `promise` 的 `reason`。该 `r` 代表 `rejected` 值。
+		2.3.3.3.3 如果 `resolvePromise` 和 `rejectPromise` 都被调用了，那么就采用首次的调用，并忽略后续的调用。如果 `resolvePromise` 被用相同的参数调用了多次，那么就采用首次的调用，并忽略后续的调用。如果 `rejectPromise` 被相同的参数调用了多次，那么就采用首次的调用，并忽略后续的调用。
+		2.3.3.3.3.4 如果执行 `then` 函数的过程中，程序抛出了异常 `e`：
+			2.3.3.3.3.4.1 如果已经调用过了 `resolvePromise` 或 `rejectPromise`，那么就忽略 `e`。
+			2.3.3.3.3.4.2 否则就拒绝 `promise`，并用 `e` 来作为 `promise` 的 `reason`。
+	2.3.3.4 如果 `then` 不是一个函数，那么就解决 `promise`，并用 `x` 来作为 `promise` 的 `value`。
+
+> 关于 2.3.3.1，根据规范的描述，算法有可能会多次调用 `x.then` 函数，而 `x.then` 有可能在程序运行的过程中发生突变，为了保证每一次调用的 `x.then` 函数都是相同的，规范才会要求新建一个 `then` 变量来存储 `x.then` 的快照，并在后续的调用中操作 `then` 而不是 `x.then`。
+
+2.3.4 如果 `x` 不是一个对象或函数，那么就解决 `promise`，并用 `x` 来作为 `promise` 的 `value`。
+
+如果一个 Promise 实例被一个 `thenable` 解决了，且该 `thenable` 从属于一个循环的 `thenable` 链的话，那么 `[[Resolve]]( promise, thenable )` 就会递归调用自身，这便意味着算法/程序会陷入到无限递归之中。Promises/A+ 鼓励但不强制要求实现对这种无限递归的检测，如果检测到存在这种无限递归的话，那么就拒绝 `promise`，并用一个语意良好的 `TypeError` 来作为 `promise` 的 `reason`。
+
+> 规范认为，不应该通过设定递归的深度上限来检测算法是否陷入到无限递归之中，因为真正的无限递归的深度是无限的。
+
+## 参考资料
+
+- [Promises/A+](https://promisesaplus.com)
+- [Promises/A+ 的翻译](https://www.ituring.com.cn/article/66566)
+
+[Promises/A+](https://promisesaplus.com) 自身比较晦涩，而 [Promises/A+ 的翻译](https://www.ituring.com.cn/article/66566) 是一份良好的简中版本，不过你应该在熟读前者的基础上，再结合后者来使用，而非单纯的依赖后者。
+
+本文是一份比 [Promises/A+ 的翻译](https://www.ituring.com.cn/article/66566) 更好的简中版本，因为本文更加浅显易懂。
