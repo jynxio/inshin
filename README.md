@@ -1,3 +1,6 @@
+<img src="./promisesaplus-icon.png" width="100" height="100" />
+<br />
+
 ## Overview
 
 A Promise implementation that conforms to the [Promises/A+ spec](https://promisesaplus.com/), it has passed the [Promises/A+ test](https://github.com/promises-aplus/promises-tests) 100%.
