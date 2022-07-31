@@ -10,7 +10,7 @@
 
 Promises/A+ 厘清了早期的 Promises/A 提案的行为规范，extending it to cover de facto behaviors，并省略掉了一些模糊的与存疑的部分。
 
-最后，Promises/A+ 规范不涉及如何创建、解决、拒绝 `promise` ，而是专注于定义 `then` 方法的行为规范，不过该规范在未来也可能会涉及到创建、解决、拒绝 `promise` 的事情。
+最后，Promises/A+ 规范不涉及如何创建、敲定、拒绝 `promise` ，而是专注于定义 `then` 方法的行为规范，不过该规范在未来也可能会涉及到创建、敲定、拒绝 `promise` 的事情。
 
 ## 1.术语
 
@@ -18,7 +18,7 @@ Promises/A+ 厘清了早期的 Promises/A 提案的行为规范，extending it t
 
 1.2 `thenable` 是一个具有 `then` 方法的对象或函数。
 
-1.3 `value` 是 `promise` 的 `fulfilled` 值，代表 `promise` 被解决时的值。
+1.3 `value` 是 `promise` 的 `fulfilled` 值，代表 `promise` 被敲定时的值。
 
 1.4 `reason` 是 `promise` 的 `rejected` 值，代表 `promise` 被拒绝时的原因。
 
@@ -65,7 +65,30 @@ promise.then( onFulfilled, onRejected );
 
 2.2.4 `onFulfilled` 和 `onRejected` 函数被当作一个微任务或宏任务来调用。
 
-2.2.5 执行 `onFulfilled` 或 `onRejected` 函数时，其内部的 `this` 在严格模式下指向 `undefined`，在宽松模式下指向全局对象。
+> 一个 Promise 实例可以注册多个 `onFulfilled` 函数，当 Promise 实例敲定后，我们应该把每一个 `onFulfilled` 函数都放在独立的微/宏任务中去，还是应该把所有的 `onFulfilled` 函数都放在同一个微/宏任务中去呢？Promises/A+ 并没对此做出说明。
+>
+> 因此在实现 Promise 时，我沿用了浏览器运行时的做法，浏览器运行时将每一个 `onFulfilled` 函数都放在独立的微任务中去了，`onRejected` 函数也是如此。
+
+2.2.5 `onFulfilled` 或 `onRejected` 要被当作函数来调用，而不是被当作方法来调用，具体来说，就是 `onFulfilled` 或 `onRejected` 在被调用时，其内部的 `this` 在严格模式下指向 `undefined`，在宽松模式下指向全局对象。
+
+> 当 `onFulfilled` 或 `onRejected` 是箭头函数时，2.2.5 所描述的内容是不可能实现的，因为箭头函数内部的 `this` 指向只取决于其外部词法作用域的 `this` 指向，这是语法层面上限制，我们不可能突破这个限制。
+>
+> 请看下面的例子，`MyPromise` 中的箭头函数内 `this` 一定会等于其外部词法作用域（即全局作用域）的 `this`，因为全局作用域的 `this` 总是会指向 `Window` 对象（无论是处于严格模式还是宽松模式），所以箭头函数内的 `this` 也总是等于 `Window` 对象，哪怕箭头函数处于严格模式中，而这显然违反了 2.2.5。另外，浏览器运行时的 Promise 的实现也不遵循 2.2.5。
+>
+> ```html
+> <script>
+> 
+> 	"use strtci";
+> 
+>     console.log( this );                                  // Window对象
+>     MyPromise.resolve().then( _ => console.log( this ) ); // Window对象
+>     
+> 	Promise.resolve().then( _ => console.log( this ) );   // Window对象
+> 
+> </script>
+> ```
+>
+> 我认为 Promises/A+ 并没有考虑到上述问题，因此在我的实现版本中，仅当 `onFulfilled` 或 `onRejected` 是由 `function` 关键字所声明的函数时，其行为才会遵循 2.2.5，如果 `onFulfilled` 或 `onRejected` 是箭头函数，那么其行为就会表现的和浏览器运行时的 Promise 一致。
 
 2.2.6 一个 `promise` 可以多次调用 `then` 方法：
 	2.2.6.1 当 `promise` 切换至 `fulfilled` 状态之后，`promise` 上的 `onFulfilled` 函数们都必须按照各自当初注册时的先后顺序来调用。
@@ -77,7 +100,7 @@ promise.then( onFulfilled, onRejected );
 const promise_2 = promise_1.then( onFulfilled, onRejected );
 ```
 
-​	2.2.7.1 如果 `onFulFilled` 或 `onRejected` 返回了一个值 `x`，那么就要运行 `promise 处理程序`，来确定 `promise_2` 的 `value` 或 `reason`，`promise 处理程序` 被表示为 `[[Resolve]]( promise_2, x )`。
+​	2.2.7.1 如果 `onFulFilled` 或 `onRejected` 返回了一个值 `x`，那么就要运行 `promise 处理程序`，来确定 `promise_2` 的状态、`value`、`reason`，`promise 处理程序` 被表示为 `[[Resolve]]( promise_2, x )`。
 ​	2.2.7.2 如果 `onFulfilled` 或 `onRejected` 抛出了一个异常 `e`，那么 `promise_2` 就要切换到 `rejected` 状态，并用 `e` 来作为 `reason`。
 ​	2.2.7.3 如果 `onFulfilled` 不是一个函数，并且 `promise_1` 切换到了 `fulfilled` 状态，那么就要把 `promise_2` 切换到 `fulfilled` 状态，并且要用 `promise_1` 的 `value` 来作为 `promise_2` 的 `value`。
 ​	2.2.7.4 如果 `onRejected` 不是一个函数，并且 `promise_1` 切换到了 `rejected` 状态，那么就要把 `promise_2` 切换到 `rejected` 状态，并且要用 `promise_1` 的 `reason` 来作为 `promise_2` 的 `reason`。
@@ -92,7 +115,7 @@ const promise_2 = promise_1.then( onFulfilled, onRejected );
 
 > ECMAScript 规范会使用 `[[]]` 来表示内部属性或方法。
 
-如果 `x` 是一个 `thenable` 且看起来像一个 Promise 实例的话，那么 `promise 处理程序` 就会试图让 `promise` 采用 `x` 的状态，否则 `promise 处理程序` 就会用 `x` 的值来解决 `peomise`。
+如果 `x` 是一个 `thenable` 且看起来像一个 Promise 实例的话，那么 `promise 处理程序` 就会试图让 `promise` 采用 `x` 的状态，否则 `promise 处理程序` 就会用 `x` 的值来敲定 `peomise`。
 
 这种设计使得 Promise 变得更加通用，因为 Promise 可以接收和处理 `thenable`，只要 `thenable` 的 `then` 方法遵循 Promises/A+ 规范即可。这意味着，遵循 Promises/A+ 规范的 Promise 可以和那些不太遵循 Promises/A+ 规范但实现尚可良好的 Promise 一起使用。
 
@@ -101,7 +124,7 @@ const promise_2 = promise_1.then( onFulfilled, onRejected );
 2.3.1 如果 `x` 和 `promise` 指向同一个对象，那么就拒绝 `promise`，并用 `TypeError` 来作为它的 `reason`。
 
 2.3.2 如果 `x` 是一个 Promise 实例，则令 `promise` 采用 `x` 的状态：
-	2.3.2.1 当 `x` 处于 `pending` 状态时，`promise` 也要保持 `pending` 状态，直至 `x` 被解决或拒绝。
+	2.3.2.1 当 `x` 处于 `pending` 状态时，`promise` 也要保持 `pending` 状态，直至 `x` 被敲定或拒绝。
 	2.3.2.2 当 `x` 切换到 `fulfilled` 状态后，`promise` 也要立即切换到 `fulfilled` 状态，并用 `x` 的 `value` 来作为 `promise` 的 `value`。
 	2.3.2.3 当 `x` 切换到 `rejected` 状态后，`promise` 也要立即切换到 `rejected` 状态，并用 `x` 的 `reason` 来作为 `promise` 的 `reason`。
 
@@ -115,13 +138,13 @@ const promise_2 = promise_1.then( onFulfilled, onRejected );
 		2.3.3.3.3.4 如果执行 `then` 函数的过程中，程序抛出了异常 `e`：
 			2.3.3.3.3.4.1 如果已经调用过了 `resolvePromise` 或 `rejectPromise`，那么就忽略 `e`。
 			2.3.3.3.3.4.2 否则就拒绝 `promise`，并用 `e` 来作为 `promise` 的 `reason`。
-	2.3.3.4 如果 `then` 不是一个函数，那么就解决 `promise`，并用 `x` 来作为 `promise` 的 `value`。
+	2.3.3.4 如果 `then` 不是一个函数，那么就敲定 `promise`，并用 `x` 来作为 `promise` 的 `value`。
 
 > 关于 2.3.3.1，根据规范的描述，算法有可能会多次调用 `x.then` 函数，而 `x.then` 有可能在程序运行的过程中发生突变，为了保证每一次调用的 `x.then` 函数都是相同的，规范才会要求新建一个 `then` 变量来存储 `x.then` 的快照，并在后续的调用中操作 `then` 而不是 `x.then`。
 
-2.3.4 如果 `x` 不是一个对象或函数，那么就解决 `promise`，并用 `x` 来作为 `promise` 的 `value`。
+2.3.4 如果 `x` 不是一个对象或函数，那么就敲定 `promise`，并用 `x` 来作为 `promise` 的 `value`。
 
-如果一个 Promise 实例被一个 `thenable` 解决了，且该 `thenable` 从属于一个循环的 `thenable` 链的话，那么 `[[Resolve]]( promise, thenable )` 就会递归调用自身，这便意味着算法/程序会陷入到无限递归之中。Promises/A+ 鼓励但不强制要求实现对这种无限递归的检测，如果检测到存在这种无限递归的话，那么就拒绝 `promise`，并用一个语意良好的 `TypeError` 来作为 `promise` 的 `reason`。
+如果一个 Promise 实例被一个 `thenable` 敲定了，且该 `thenable` 从属于一个循环的 `thenable` 链的话，那么 `[[Resolve]]( promise, thenable )` 就会递归调用自身，这便意味着算法/程序会陷入到无限递归之中。Promises/A+ 鼓励但不强制要求实现对这种无限递归的检测，如果检测到存在这种无限递归的话，那么就拒绝 `promise`，并用一个语意良好的 `TypeError` 来作为 `promise` 的 `reason`。
 
 > 规范认为，不应该通过设定递归的深度上限来检测算法是否陷入到无限递归之中，因为真正的无限递归的深度是无限的。
 
