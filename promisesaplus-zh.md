@@ -134,13 +134,15 @@ const promise_2 = promise_1.then( onFulfilled, onRejected );
 	2.3.3.3 如果 `then` 是一个函数，那么就调用 `then` 函数，并用 `x` 来作为它调用时的 `this`。并且 `then` 函数要接收 2 个回调函数来作为入参，第一个入参叫做 `resolvePromise`，第二个入参叫做 `rejectPromise`。
 		2.3.3.3.1 如果 `resolvePromise` 被调用，并接收了一个值 `y` 来作为入参，那么就执行 `[[Resolve]]( promise, y )`。该 `y` 代表 `fulfilled` 值。
 		2.3.3.3.2 如果 `rejectPromise` 被调用，并接收了一个值 `r` 来作为入参，那么就拒绝 `promise`，并用 `r` 来作为 `promise` 的 `reason`。该 `r` 代表 `rejected` 值。
-		2.3.3.3.3 如果 `resolvePromise` 和 `rejectPromise` 都被调用了，那么就采用首次的调用，并忽略后续的调用。如果 `resolvePromise` 被用相同的参数调用了多次，那么就采用首次的调用，并忽略后续的调用。如果 `rejectPromise` 被相同的参数调用了多次，那么就采用首次的调用，并忽略后续的调用。
+		2.3.3.3.3 如果 `resolvePromise` 和 `rejectPromise` 都被调用了，那么就采用首次的调用，并忽略另一个调用。如果 `resolvePromise` 被用相同的参数调用了多次，那么就采用首次的调用，并忽略后续的调用。如果 `rejectPromise` 被相同的参数调用了多次，那么就采用首次的调用，并忽略后续的调用。
 		2.3.3.3.3.4 如果执行 `then` 函数的过程中，程序抛出了异常 `e`：
 			2.3.3.3.3.4.1 如果已经调用过了 `resolvePromise` 或 `rejectPromise`，那么就忽略 `e`。
 			2.3.3.3.3.4.2 否则就拒绝 `promise`，并用 `e` 来作为 `promise` 的 `reason`。
 	2.3.3.4 如果 `then` 不是一个函数，那么就敲定 `promise`，并用 `x` 来作为 `promise` 的 `value`。
 
 > 关于 2.3.3.1，根据规范的描述，算法有可能会多次调用 `x.then` 函数，而 `x.then` 有可能在程序运行的过程中发生突变，为了保证每一次调用的 `x.then` 函数都是相同的，规范才会要求新建一个 `then` 变量来存储 `x.then` 的快照，并在后续的调用中操作 `then` 而不是 `x.then`。
+>
+> 关于 2.3.3.3，`x.then` 既有可能是普通函数，也有可能是箭头函数，这取决于开发者是如何编写 `handleFulfilled` 和 `handleRejected` 的，因为 `x` 代表这两个回调函数的返回值。`then` 取自于 `x.then`，如果 `x.then` 是箭头函数，那么调用 `then` 时，`then` 内部的 `this` 是无法控制的，这意味着，我们无法强制让 `then` 内的 `this` 指向 `x`。Promises/A+ 并没有考虑到这一点。
 
 2.3.4 如果 `x` 不是一个对象或函数，那么就敲定 `promise`，并用 `x` 来作为 `promise` 的 `value`。
 
