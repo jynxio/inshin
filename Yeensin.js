@@ -1,3 +1,11 @@
+/**
+ * 描述：
+ * - 该脚本实现了一个符合 Promises/A+ 规范的Promise polyfill，名为Yeensin。
+ * - 该脚本中的Yeensin仅提供构造器和then方法，而不包括catch、finaly等其他方法。
+ * - 如果你想获取一个符合ECMAScript规范的Promise polyfill，那么请使用和参阅另
+ *   一个名为YeensinPlus.js的文件。
+ */
+
 const PENDING_STATE = "pending";
 const FULFILLED_STATE = "fulfilled";
 const REJECTED_STATE = "rejected";
