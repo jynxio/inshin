@@ -1,7 +1,3 @@
-/**
- * 请说明该实现是否支持 promise_2 === promise_1，详见2.2.7的备注。
- */
-
 const PENDING_STATE = "pending";
 const FULFILLED_STATE = "fulfilled";
 const REJECTED_STATE = "rejected";
