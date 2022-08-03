@@ -1,41 +1,36 @@
-const Yeensin = require( "Yeensin" );
+const Yeensin = require( "./Yeensin" );
 
+/**
+ * TODO 等待测试
+ * @param { * } fulfilled_value - Yeensin实例的敲定值，或Yeensin实例，或thenable对象。
+ * @returns { Object } Yeensin实例。
+ */
 Yeensin.resolve = function resolve ( fulfilled_value ) {
 
-    /*  */
+    /* fulfilled_value是Yeensin实例。 */
     if ( Object.getPrototypeOf( fulfilled_value ) === Yeensin.prototype ) {
 
         return fulfilled_value;
 
     }
 
-    /*  */
-    let yeensinResolve;
-
-    const yeensin = new Yeensin( resolve => yeensinResolve = resolve );
-
+    /* fulfilled_value是thenable对象。 */
     if (
         ( typeof fulfilled_value === "object" && fulfilled_value !== null )
         ||
-        typeof fulfilled_value === "function"
+        ( typeof fulfilled_value === "function" )
     ) {
 
-        const then = fulfilled_value.then;
+        const yeensin = new Yeensin( ( resolve, reject ) => {
 
-        if ( typeof then === "function" ) {
+            fulfilled_value.then( resolve, reject );
 
-            then.call( fulfilled_value, yeensinResolve );
-
-            return yeensin;
-
-        }
+        } );
 
     }
 
-    /*  */
-    yeensinResolve( fulfilled_value );
-
-    return yeensin;
+    /* fulfilled_value是其他。 */
+    return new Yeensin( resolve => resolve( fulfilled_value ) );
 
 };
 
@@ -151,7 +146,71 @@ Yeensin.all = function all ( iterable ) {
 
 };
 
-Yeensin.any = function any () {};
+Yeensin.any = function any ( iterable ) {
+
+    /*  */
+    let yeensinResolve;
+    let yeensinReject;
+
+    const yeensin = new Yeensin( ( resolve, reject ) => {
+
+        yeensinResolve = resolve;
+        yeensinReject = reject;
+
+    } );
+
+    /*  */
+    if ( ! Array.from( iterable ).length ) {
+
+        yeensinReject( new AggregateError( "", "All promises were rejected" ) );
+
+        return yeensin;
+
+    }
+
+    /*  */
+    let index = 0;
+
+    const others = [];
+    const yeensins = [];
+
+    const others_indexes = [];
+    const yeensins_indexes = [];
+
+    for ( const item of iterable ) {
+
+        if ( Object.getPrototypeOf( item ) === Yeensin.prototype ) {
+
+            yeensins.push( item );
+            yeensins_indexes.push( index );
+
+            index ++;
+
+            continue;
+
+        }
+
+        others.push( item )
+        others_indexes.push( index );
+
+        index ++;
+
+    }
+
+    /*  */
+    if ( others.length ) {
+
+        const microtask = _ => yeensinResolve( others[ 0 ] );
+
+        globalThis.queueMicrotask( microtask );
+
+        return yeensin;
+
+    }
+
+    /*  */
+
+};
 
 Yeensin.race = function race () {};
 
@@ -160,3 +219,5 @@ Yeensin.allSettled = function allSettled () {};
 Yeensin.prototype.catch = function () {};
 
 Yeensin.prototype.finally = function () {};
+
+module.exports = Yeensin;
