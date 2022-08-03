@@ -51,6 +51,44 @@ function Yeensin ( execute ) {
 
         } );
 
+        // TODO 如果展平的过程中，发生了错误，那么就会reject
+        // TODO thenable的then方法会接受Yeensin实例的resolve和reject来作为入参，如果then调用了reject，那么Yeensin实例也会reject
+        function flatten ( fulfilled_value ) {
+
+            let result;
+
+            resolve( fulfilled_value );
+
+            return result;
+
+            function resolve ( fulfilled_value ) {
+
+                if ( typeof fulfilled_value?.then !== "function" ) {
+
+                    resolve = fulfilled_value;
+
+                    return;
+
+                }
+
+                const microtask = _ => {
+
+                    thenable.then( resolve, reject );
+
+                };
+
+                globalThis.queueMicrotask( microtask );
+
+            }
+
+            function reject ( rejected_value ) {
+
+                result = rejected_value;
+
+            }
+
+        }
+
     };
 
     /**
