@@ -27,6 +27,8 @@ Yeensin.resolve = function resolve ( fulfilled_value ) {
 
         } );
 
+        return yeensin;
+
     }
 
     /* fulfilled_value是其他。 */
