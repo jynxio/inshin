@@ -6,8 +6,6 @@ A Promise implementation that conforms to the [Promises/A+ spec](https://promise
 
 `yeensin` is a homonym of `应承`, in cantonese, `应承` stands for promise.
 
-> I am organizing the content of this project.
-
 <br />
 
 ## License
@@ -21,8 +19,6 @@ A Promise implementation that conforms to the [Promises/A+ spec](https://promise
 一个符合 [Promises/A+ 规范](https://promisesaplus.com/) 的 Promise 实现，该实现已经 100% 通过了 [Promises/A+ 测试](https://github.com/promises-aplus/promises-tests)。
 
 `yeensin` 是 `应承` 的谐音，在粤语中，`应承` 代表答应、承诺。
-
-> 我正在整理项目的内容。
 
 <br />
 
