@@ -1,9 +1,9 @@
 /**
  * 描述：
- * - 该脚本实现了一个符合 Promises/A+ 规范的Promise polyfill，名为Yeensin。
- * - 该脚本中的Yeensin仅提供构造器和then方法，而不包括catch、finaly等其他方法。
+ * - 该脚本实现了一个符合 Promises/A+ 规范的Promise polyfill，名为Inshin。
+ * - 该脚本中的Inshin仅提供构造器和then方法，而不包括catch、finaly等其他方法。
  * - 如果你想获取一个符合ECMAScript规范的Promise polyfill，那么请使用和参阅另
- *   一个名为YeensinPlus.js的文件。
+ *   一个名为InshinPlus.js的文件。
  */
 
 const PENDING_STATE = "pending";
@@ -13,11 +13,11 @@ const REJECTED_STATE = "rejected";
 /**
  * 通过 Promises/A+ 测试的 Promise polyfill。
  * @param   { Function } execute - 该入参等同于原生Promise的入参。
- * @returns { Object } - Yeensin实例，等同于Promise实例。
+ * @returns { Object } - Inshin实例，等同于Promise实例。
  */
 function Inshin ( execute ) {
 
-    /* Yeensin实例的内部数据。 */
+    /* Inshin实例的内部数据。 */
     const self = this;
 
     self._state = PENDING_STATE;
@@ -32,8 +32,8 @@ function Inshin ( execute ) {
     execute( resolve, reject );
 
     /**
-     * resolve函数，用于敲定Yeensin实例。
-     * @param   { * } fulfilled_value Yeensin实例的fulfilled值，代表敲定后的值。
+     * resolve函数，用于敲定Inshin实例。
+     * @param   { * } fulfilled_value Inshin实例的fulfilled值，代表敲定后的值。
      * @returns { undefined } - undefined。
      */
     function resolve ( fulfilled_value ) {
@@ -53,8 +53,8 @@ function Inshin ( execute ) {
     };
 
     /**
-     * rejecte函数，用于拒绝Yeensin实例。
-     * @param   { * } rejected_value - Yeensin实例的rejected值，代表被拒绝的原因。
+     * rejecte函数，用于拒绝Inshin实例。
+     * @param   { * } rejected_value - Inshin实例的rejected值，代表被拒绝的原因。
      * @returns { undefined } - undefined。
      */
     function reject ( rejected_value ) {
@@ -78,29 +78,29 @@ function Inshin ( execute ) {
 
 /**
  * then方法。
- * @param { Function } handleFulfilled - Yeensin实例的fulfilled订阅函数。
- * @param { Function } handleRejected  - Yeensin实例的rejected订阅函数。
- * @returns { Object } - 一个新的Yeensin实例或一个新的thenable对象。
+ * @param { Function } handleFulfilled - Inshin实例的fulfilled订阅函数。
+ * @param { Function } handleRejected  - Inshin实例的rejected订阅函数。
+ * @returns { Object } - 一个新的Inshin实例或一个新的thenable对象。
  */
 Inshin.prototype.then = function then ( handleFulfilled, handleRejected ) {
 
     /*  */
-    let yeensinResolve;
-    let yeensinReject;
+    let inshinResolve;
+    let inshinReject;
 
-    const yeensin = new Inshin( ( resolve, reject ) => {
+    const inshin = new Inshin( ( resolve, reject ) => {
 
-        yeensinResolve = resolve;
-        yeensinReject = reject;
+        inshinResolve = resolve;
+        inshinReject = reject;
 
     } );
 
     /*  */
-    this._fulfilled_events.push( handleFulfilledAndYeensin );
+    this._fulfilled_events.push( handleFulfilledAndInshin );
 
     if ( this._state === FULFILLED_STATE ) {
 
-        const microtask = _ => handleFulfilledAndYeensin( this._fulfilled_value );
+        const microtask = _ => handleFulfilledAndInshin( this._fulfilled_value );
 
         globalThis.queueMicrotask( microtask );
 
@@ -108,10 +108,10 @@ Inshin.prototype.then = function then ( handleFulfilled, handleRejected ) {
 
     /**
      * handleFulfilled函数的代理者。
-     * @param { * } fulfilled_value - Yeensin实例的fulfilled值。
+     * @param { * } fulfilled_value - Inshin实例的fulfilled值。
      * @returns { undefined } - undefined。
      */
-    function handleFulfilledAndYeensin ( fulfilled_value ) {
+    function handleFulfilledAndInshin ( fulfilled_value ) {
 
         if ( typeof handleFulfilled === "function" ) {
 
@@ -123,26 +123,26 @@ Inshin.prototype.then = function then ( handleFulfilled, handleRejected ) {
 
             } catch ( error ) {
 
-                yeensinReject( error );
+                inshinReject( error );
 
             }
 
-            yeensinResolutionProcedure( yeensin, x );
+            inshinResolutionProcedure( inshin, x );
 
         } else {
 
-            yeensinResolve( fulfilled_value );
+            inshinResolve( fulfilled_value );
 
         }
 
     }
 
     /* */
-    this._rejected_events.push( handleRejectedAndYeensin );
+    this._rejected_events.push( handleRejectedAndInshin );
 
     if ( this._state === REJECTED_STATE ) {
 
-        const microtask = _ => handleRejectedAndYeensin( this._rejected_value );
+        const microtask = _ => handleRejectedAndInshin( this._rejected_value );
 
         globalThis.queueMicrotask( microtask );
 
@@ -150,10 +150,10 @@ Inshin.prototype.then = function then ( handleFulfilled, handleRejected ) {
 
     /**
      * handleRejected函数的代理者
-     * @param { * } rejected_value - Yeensin实例的rejected值。
+     * @param { * } rejected_value - Inshin实例的rejected值。
      * @returns { undefined } - undefined。
      */
-    function handleRejectedAndYeensin ( rejected_value ) {
+    function handleRejectedAndInshin ( rejected_value ) {
 
         if ( typeof handleRejected === "function" ) {
 
@@ -165,32 +165,32 @@ Inshin.prototype.then = function then ( handleFulfilled, handleRejected ) {
 
             } catch ( error ) {
 
-                yeensinReject( error );
+                inshinReject( error );
 
             }
 
-            yeensinResolutionProcedure( yeensin, x );
+            inshinResolutionProcedure( inshin, x );
 
         } else {
 
-            yeensinReject( rejected_value );
+            inshinReject( rejected_value );
 
         }
 
     }
 
-    /* [[Resolve]]( yeensin, x ) */
+    /* [[Resolve]]( inshin, x ) */
     /**
      * The Promise Resolution Procedure，详见规范的2.3。
-     * @param { Object } yeensin - Yeensin实例或thenable对象。
+     * @param { Object } inshin - Inshin实例或thenable对象。
      * @param { * } x - handleFulfilled函数或handleRejected函数的返回值。
      * @returns { undefined } - undefine。
      */
-    function yeensinResolutionProcedure ( yeensin, x ) {
+    function inshinResolutionProcedure ( inshin, x ) {
 
         if ( x === null ) {
 
-            yeensinResolve( x );
+            inshinResolve( x );
 
             return;
 
@@ -198,15 +198,15 @@ Inshin.prototype.then = function then ( handleFulfilled, handleRejected ) {
 
         if ( typeof x !== "object" && typeof x !== "function" ) {
 
-            yeensinResolve( x );
+            inshinResolve( x );
 
             return;
 
         }
 
-        if ( x === yeensin ) {
+        if ( x === inshin ) {
 
-            yeensinReject( new TypeError( "Chaining cycle detected for promise" ) );
+            inshinReject( new TypeError( "Chaining cycle detected for promise" ) );
 
             return;
 
@@ -222,7 +222,7 @@ Inshin.prototype.then = function then ( handleFulfilled, handleRejected ) {
 
             } catch ( error ) {
 
-                yeensinReject( error );
+                inshinReject( error );
 
             }
 
@@ -236,7 +236,7 @@ Inshin.prototype.then = function then ( handleFulfilled, handleRejected ) {
 
                     is_finish = true;
 
-                    yeensinResolutionProcedure( yeensin, y )
+                    inshinResolutionProcedure( inshin, y )
 
                 };
                 const reject = function reject ( r ) {
@@ -245,7 +245,7 @@ Inshin.prototype.then = function then ( handleFulfilled, handleRejected ) {
 
                     is_finish = true;
 
-                    yeensinReject( r )
+                    inshinReject( r )
 
                 };
 
@@ -255,7 +255,7 @@ Inshin.prototype.then = function then ( handleFulfilled, handleRejected ) {
 
                 } catch ( error ) {
 
-                    if ( ! is_finish ) yeensinReject( error );
+                    if ( ! is_finish ) inshinReject( error );
 
                 }
 
@@ -263,14 +263,14 @@ Inshin.prototype.then = function then ( handleFulfilled, handleRejected ) {
 
             }
 
-            yeensinResolve( x );
+            inshinResolve( x );
 
         }
 
     }
 
     /*  */
-    return yeensin;
+    return inshin;
 
 }
 
