@@ -1,8 +1,8 @@
-const Yeensin = require( "./Yeensin" );
+const Inshin = require( "./Inshin" );
 
 function resolved ( value ) {
 
-    return new Yeensin( function ( resolve, reject ) {
+    return new Inshin( function ( resolve, reject ) {
 
         resolve( value );
 
@@ -12,7 +12,7 @@ function resolved ( value ) {
 
 function rejected ( reason ) {
 
-    return new Yeensin( function ( resolve, reject ) {
+    return new Inshin( function ( resolve, reject ) {
 
         reject( reason );
 
@@ -26,7 +26,7 @@ function deferred () {
     let reject;
 
     return ( {
-        promise: new Yeensin( function ( rs, rj ) {
+        promise: new Inshin( function ( rs, rj ) {
 
             resolve = rs;
             reject = rj;

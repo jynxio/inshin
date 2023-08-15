@@ -15,7 +15,7 @@ const REJECTED_STATE = "rejected";
  * @param   { Function } execute - 该入参等同于原生Promise的入参。
  * @returns { Object } - Yeensin实例，等同于Promise实例。
  */
-function Yeensin ( execute ) {
+function Inshin ( execute ) {
 
     /* Yeensin实例的内部数据。 */
     const self = this;
@@ -82,13 +82,13 @@ function Yeensin ( execute ) {
  * @param { Function } handleRejected  - Yeensin实例的rejected订阅函数。
  * @returns { Object } - 一个新的Yeensin实例或一个新的thenable对象。
  */
-Yeensin.prototype.then = function then ( handleFulfilled, handleRejected ) {
+Inshin.prototype.then = function then ( handleFulfilled, handleRejected ) {
 
     /*  */
     let yeensinResolve;
     let yeensinReject;
 
-    const yeensin = new Yeensin( ( resolve, reject ) => {
+    const yeensin = new Inshin( ( resolve, reject ) => {
 
         yeensinResolve = resolve;
         yeensinReject = reject;
@@ -274,4 +274,4 @@ Yeensin.prototype.then = function then ( handleFulfilled, handleRejected ) {
 
 }
 
-module.exports = Yeensin;
+module.exports = Inshin;
