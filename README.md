@@ -12,7 +12,7 @@ Additionally, if you want to understand the implementation of `Inshin`, I recomm
 
 ## License
 
-This project follows the [MIT]((https://github.com/jynxio/yeensin/blob/main/LICENSE)) license.
+This project follows the [MIT]((https://github.com/jynxio/inshin/blob/main/LICENSE)) license.
 
 <br />
 
@@ -28,6 +28,6 @@ This project follows the [MIT]((https://github.com/jynxio/yeensin/blob/main/LICE
 
 ## 许可
 
-本项目遵循 [MIT](https://github.com/jynxio/yeensin/blob/main/LICENSE) 协议。
+本项目遵循 [MIT](https://github.com/jynxio/inshin/blob/main/LICENSE) 协议。
 
 <br />
