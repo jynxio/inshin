@@ -2,15 +2,17 @@
 
 ## Overview
 
-A Promise implementation that conforms to the [Promises/A+ spec](https://promisesaplus.com/), it has passed the [Promises/A+ test](https://github.com/promises-aplus/promises-tests) 100%.
+A Promise implementation that conforms to the [Promises/A+ specification](https://promisesaplus.com/), and this implementation has successfully passed the [Promises/A+ tests](https://github.com/promises-aplus/promises-tests).
 
-> `yeensin` is a homonym of `应承`, in cantonese, `应承` stands for promise.
+> `Inshin` is a homophone of the Cantonese word `应承` (yīng sǐng), which means promise in Cantonese and represents a commitment.
+
+Additionally, if you want to understand the implementation of `Inshin`, I recommend you read [my blog post](https://www.jynxio.com/article/javascript/promisesaplus.html), as it provides better readability and also includes a simplified Chinese version of the Promises/A+ specification.
 
 <br />
 
 ## License
 
-[MIT](https://github.com/jynxio/yeensin/blob/main/LICENSE)
+This project follows the [MIT]((https://github.com/jynxio/yeensin/blob/main/LICENSE)) license.
 
 <br />
 
@@ -18,9 +20,9 @@ A Promise implementation that conforms to the [Promises/A+ spec](https://promise
 
 一个符合 [Promises/A+ 规范](https://promisesaplus.com/) 的 Promise 实现，该实现已经 100% 通过了 [Promises/A+ 测试](https://github.com/promises-aplus/promises-tests)。
 
-> `yeensin` 是 `应承` 的谐音，在粤语中，`应承` 代表答应、承诺。
+> `Inshin` 是粤语中的 `应承` 的谐音，`应承` 在粤语中代表承诺。
 
-另外，如果你想阅读 `Yeensin` 的实现，那么我推荐你看我的 [这篇博客](https://www.jynxio.com/article/javascript/promisesaplus.html)，因为它的可读性更好，同时还提供了一份简中版本的 Promises/A+ 规范。
+另外，如果你想阅读 `Inshin` 的实现，那么我推荐你看我的 [这篇博客](https://www.jynxio.com/article/javascript/promisesaplus.html)，因为它的可读性更好，同时还提供了一份简中版本的 Promises/A+ 规范。
 
 <br />
 
